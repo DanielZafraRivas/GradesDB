@@ -9,6 +9,7 @@ DELETE FROM degrees;
 DELETE FROM groups;
 DELETE FROM group_enrollments;
 DELETE FROM grades;
+DELETE FROM subjects;
 DELETE FROM subject_enrollments;
 DELETE FROM teaching_loads;
 SET FOREIGN_KEY_CHECKS = 1;
@@ -39,7 +40,11 @@ INSERT INTO people (person_id, dni, first_name, last_name, age, email) VALUES
     (23, '10000023Y', 'Irene', 'Salas', 21, 'irene.salas@alum.us.es'),
     (24, '10000024Z', 'Álex', 'Delgado', 22, 'alex.delgado@alum.us.es'),
     (25, '10000025A', 'Paula', 'Bermejo', 21, 'paula.bermejo@alum.us.es');
-
+    
+-- INSERT INTO people (dni, first_name, last_name, age, email) VALUES 
+	--	('99999999Z', 'Juan', 'Test', 15, 'juan@test.es'),
+	--	('88888888A', 'Ana', 'Test', 25, 'ana@test.es'),
+	--	('88888888A', 'Pedro', 'Test', 30, 'pedro@test.es');
 
 INSERT INTO professors (professor_id, category) VALUES
     (1, 'Catedrático'),
