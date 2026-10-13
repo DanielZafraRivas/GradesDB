@@ -54,7 +54,15 @@ VALUES (1, 'Asignatura Test', 'TST', 8, 1, 'Obligatoria');
 INSERT INTO groups (subject_id, group_name, activity, academic_year)
 VALUES (1, 'T1', 'Teoría', 1999);
 
+
 -- Prueba a insertar una carga docente con créditos cero o negativos:
 
 INSERT INTO teaching_loads (professor_id, group_id, credits)
 VALUES (1, 1, 0);
+
+
+-- Prueba a insertar una nota con matrícula de honor pero valor inferior a 9:
+
+INSERT INTO grades (student_id, group_id, grade_value, exam_call, with_honors)
+VALUES (1, 1, 8.5, 'Primera', 1);
+
