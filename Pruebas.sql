@@ -1,4 +1,4 @@
-USE grados;
+gradosUSE grados;
 
 -- Prueba 1: Edad fuera de rango ==========================================
 INSERT INTO people (dni, first_name, last_name, age, email) VALUES

@@ -222,3 +222,5 @@ WHERE person_id = 100;
 -- Ejemplo 3: Borrar notas de suspenso
 DELETE FROM grades
 WHERE grade_value < 5;
+
+
