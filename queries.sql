@@ -93,3 +93,23 @@ FROM grades g;
 
 SELECT MIN(g.grade_value) AS min_grade
 FROM grades g;
+
+
+SELECT g.grade_id, g.grade_value, g.exam_call
+FROM grades g
+WHERE g.grade_value < 5 OR g.grade_value > 9;
+
+
+SELECT g.grade_id, g.grade_value, g.exam_call
+FROM grades g
+WHERE g.grade_value BETWEEN 5 AND 7;
+
+
+SELECT s.subject_name, s.credits
+FROM subjects s
+WHERE s.credits IN (6, 12);
+
+
+SELECT p.first_name, p.last_name, p.age
+FROM people p
+WHERE p.age BETWEEN 20 AND 30;
