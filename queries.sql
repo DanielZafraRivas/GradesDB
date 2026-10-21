@@ -444,4 +444,46 @@ FROM v_professors pr
 JOIN teaching_loads tl ON pr.professor_id = tl.professor_id
 GROUP BY pr.professor_id, pr.first_name, pr.last_name, pr.category;
 
+
+-- HAVING: Filtrado de grupos ===============================================================================
+
+SELECT 
+		st.first_name,
+		st.last_name,
+		AVG(g.grade_value) AS average_grade
+FROM v_students st
+JOIN grades g ON st.student_id = g.student_id
+GROUP BY st.student_id, st.first_name, st.last_name
+HAVING AVG(g.grade_value) > 7;
+
+
+SELECT 
+		s.subject_name,
+		COUNT(*) AS total_groups
+FROM subjects s
+JOIN groups gr ON s.subject_id = gr.subject_id
+GROUP BY s.subject_id, s.subject_name
+HAVING COUNT(*) > 3;
+
+
+SELECT 
+		gr.group_name,
+		gr.activity,
+		COUNT(*) AS total_students
+FROM groups gr
+JOIN group_enrollments ge ON gr.group_id = ge.group_id
+GROUP BY gr.group_id, gr.group_name, gr.activity
+HAVING COUNT(*) > 15;
+
+
+SELECT
+		s.subject_name,
+		AVG(g.grade_value) AS average_grade,
+		COUNT(*) AS total_grades
+FROM subjects s
+JOIN groups gr ON s.subject_id = gr.subject_id
+JOIN grades g ON gr.group_id = g.group_id
+GROUP BY s.subject_id, s.subject_name
+HAVING AVG(g.grade_value) > 5.5;
+
 		
