@@ -29,7 +29,7 @@ WHERE p.dni = '10000006F';
 
 
 
--- Ejemplo 2: Procedimiento para borrar todos los datos
+-- Ejemplo 2: Procedimiento para borrar todos los datos =================================================================================================
 
 DELIMITER //
 CREATE OR REPLACE PROCEDURE p_delete_all_data()
@@ -56,6 +56,42 @@ CALL p_delete_all_data();
 SELECT COUNT(*) AS total_grades FROM grades;
 SELECT COUNT(*) AS total_students FROM students;
 SELECT COUNT(*) AS total_people FROM people;
+
+
+-- Ejemplo 3: Procedimiento para calcular el promedio de notas con parámetro OUT ================================================================================
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_student_average(IN p_student_id INT, OUT p_average DECIMAL(4,2))
+BEGIN
+	SELECT AVG(grade_value) INTO p_average
+	FROM grades
+	WHERE student_id = p_student_id;
+END //
+DELIMITER ;
+
+-- EJECUTO
+
+-- Consulto la nota media del estudiante con ID = 6
+CALL p_student_average(6, @avg_student_6);
+SELECT @avg_student_6 AS 'Promedio del estudiante 6';
+
+-- Consulto para varios estudiantes
+CALL p_student_average(7, @avg_student_7);
+CALL p_student_average(8, @avg_student_8);
+SELECT @avg_student_6, @avg_student_7, @avg_student_8;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
