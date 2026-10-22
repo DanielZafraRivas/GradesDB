@@ -566,5 +566,15 @@ WHERE d.degree_id IN (
     HAVING COUNT(*) > 15
 );
 
-		
+
+-- EJERCICIOS PROPUESTOS =================================================================================
+
+-- 1) Estudiantes que nunca han suspendido (todas sus notas ≥ 5)
+SELECT DISTINCT st.first_name, st.last_name, g.grade_value
+FROM v_students st
+JOIN grades g ON st.student_id = g.student_id
+WHERE g.grade_value > 5;
+
+
+-- 2) Profesores que solo imparten teoría (no laboratorios)
 		
