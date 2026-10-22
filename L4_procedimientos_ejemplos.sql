@@ -29,4 +29,37 @@ WHERE p.dni = '10000006F';
 
 
 
+-- Ejemplo 2: Procedimiento para borrar todos los datos
+
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_delete_all_data()
+BEGIN
+	-- Primero borramos las tablas que referencian a otras y luego las referenciadas para que ninguna fila se quede apuntando a una que ya no existe
+	DELETE FROM grades;
+	DELETE FROM teaching_loads;
+	DELETE FROM group_enrollments;
+    DELETE FROM subject_enrollments;
+    DELETE FROM groups;
+    DELETE FROM subjects;
+    DELETE FROM students;
+    DELETE FROM professors;
+    DELETE FROM degrees;
+    DELETE FROM people;
+END //
+DELIMITER ;
+	
+-- Para ejecutarlo
+-- Borra todos los datos (¡cuidado con esta operación!)
+CALL p_delete_all_data();
+
+-- Verificar que las tablas están vacías
+SELECT COUNT(*) AS total_grades FROM grades;
+SELECT COUNT(*) AS total_students FROM students;
+SELECT COUNT(*) AS total_people FROM people;
+
+
+
+
+
+
 
