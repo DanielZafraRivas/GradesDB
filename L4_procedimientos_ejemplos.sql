@@ -1,6 +1,6 @@
 USE Grados;
 
--- Ejemplo 1: Procedimiento para borrar notas de un alumno (RF02) =============================================================================================================
+-- EJEMPLO 1: Procedimiento para borrar notas de un alumno (RF02) =============================================================================================================
 
 DELIMITER // 
 CREATE OR REPLACE PROCEDURE p_delete_student_grades( IN p_student_dni CHAR(9))
@@ -29,7 +29,7 @@ WHERE p.dni = '10000006F';
 
 
 
--- Ejemplo 2: Procedimiento para borrar todos los datos =================================================================================================
+-- EJEMPLO 2: Procedimiento para borrar todos los datos ============================================================================================================================
 
 DELIMITER //
 CREATE OR REPLACE PROCEDURE p_delete_all_data()
@@ -58,7 +58,7 @@ SELECT COUNT(*) AS total_students FROM students;
 SELECT COUNT(*) AS total_people FROM people;
 
 
--- Ejemplo 3: Procedimiento para calcular el promedio de notas con parámetro OUT ================================================================================
+-- EJEMPLO 3: Procedimiento para calcular el promedio de notas con parámetro OUT ==========================================================================================================
 DELIMITER //
 CREATE OR REPLACE PROCEDURE p_student_average(IN p_student_id INT, OUT p_average DECIMAL(4,2))
 BEGIN
@@ -81,7 +81,7 @@ SELECT @avg_student_6, @avg_student_7, @avg_student_8;
 
 
 
--- Ejemplo 4: Procedimiento para subir notas de un grupo
+-- EJEMPLO 4: Procedimiento para subir notas de un grupo ==================================================================================================================================
 DELIMITER // 
 CREATE OR REPLACE PROCEDURE p_boost_group_grades(
 	IN p_group_id INT,
@@ -108,7 +108,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- EJECUTO
+-- veo las notas antes de modificar
 SELECT g.grade_id, p.first_name, p.last_name, g.grade_value, g.exam_call
 FROM grades g
 JOIN students s ON s.student_id = g.student_id
@@ -116,9 +116,78 @@ JOIN people p ON p.person_id = s.student_id
 WHERE g.group_id = 1 AND g.exam_call = 'Primera'
 ORDER BY g.grade_value;
 
+-- Ejecuto subiendo las notas del grupo 1 en primera convocatoria 
+CALL p_boost_group_grades(1, 'Primera');
 
+-- Verificamos que se ha ejecutado correctamente
+SELECT g.grade_id, p.first_name, p.last_name, g.grade_value, g.exam_call
+FROM grades g
+JOIN students s ON s.student_id = g.student_id
+JOIN people p ON p.person_id = s.student_id
+WHERE g.group_id = 1 AND g.exam_call = 'Primera'
+ORDER BY g.grade_value;
 
+-- EJEMPLO 5: Procedimiento para asignar matrículas de honor
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_assign_honors(
+	IN p_group_id INT,
+	IN p_exam_call VARCHAR(20)
+)
+BEGIN 
+	DECLARE v_total_students INT;
+	DECLARE v_max_honors INT;
+	
+	SELECT COUNT(*) INTO v_total_students
+	FROM groups 
+	WHERE group_id = p_group_id;
+	
+-- FLOOR redondea hacia abajo: con menos de 20 alumnos no hay matrículas
+	SET v_max_honors = FLOOR(v_total_students * 0.05);
+	
+	IF v_max_honors = 0 THEN
+		SELECT CONCAT('No se pueden asignar matrículas de honor: ', 'el 5% de ', v_total_students, ' estudianates matriculados es 0') AS mensaje;
+	ELSE 
+	-- Quitamos las matrículas anteriores para volver a asignarlas
+		UPDATE grades
+		SET with_honors = 0
+		WHERE group_id = p_group_id AND exam_call = p_exam_call;
+	
+-- MariaDB no admite LIMIT en una subconsulta con IN: por eso las notas elegidas se calculan en una tabla derivada (selected_grades)
+		UPDATE grades
+		SET with_honors = 1
+		WHERE grade_id IN (
+			SELECT selected_grades.grade_id
+			FROM (
+				SELECT grade_id
+				FROM grades
+				WHERE group_id = p_group_id AND exam_call = p_exam_call AND grade_value >= 9.0 
+				ORDER BY grade_value DESC 
+				LIMIT v_max_honors
+			) AS selected_grades
+		);
+	END IF;
+END // 
+DELIMITER ; 
 
+-- (vamos a ejecutarlo en el grupo 1 en primera convocatoria)
+-- Vemos las notas antes de asignar MH 
+SELECT g.grade_id, p.first_name, p.last_name, g.grade_value, g.with_honors, g.exam_call
+FROM grades g
+JOIN students s ON s.student_id = g.student_id
+JOIN people p ON p.person_id = s.student_id
+WHERE g.group_id = 1 AND g.exam_call = 'Primera'
+ORDER BY g.grade_value DESC;
+
+-- Ejecutamos 
+CALL p_assign_honors(1, 'Primera');
+
+-- Verificamos que se han asignado las matrículas correctamente (No hay mas de 20 personas asi que no se asignan, y obtenemos el mensaje)
+SELECT g.grade_id, p.first_name, p.last_name, g.grade_value, g.with_honors, g.exam_call
+FROM grades g
+JOIN students s ON s.student_id = g.student_id
+JOIN people p ON p.person_id = s.student_id
+WHERE g.group_id = 1 AND g.exam_call = 'Primera' AND g.with_honors = 1
+ORDER BY g.grade_value DESC;
 
 
 
