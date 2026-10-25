@@ -577,4 +577,16 @@ WHERE g.grade_value > 5;
 
 
 -- 2) Profesores que solo imparten teoría (no laboratorios)
+SELECT DISTINCT p.first_name, p.last_name, p.category, p.activity
+FROM v_professor_loads p
+WHERE p.activity = 'Teoría';
+
+-- 3) Asignaturas sin grupos creados (con LEFT JOIN) 
+SELECT DISTINCT s.subject_name, s.acronym, s.course
+FROM subjects s
+LEFT JOIN groups g ON s.subject_id = g.subject_id
+WHERE g.subject_id IS NULL;
+
+-- 4) Nota media de cada grado en el año 2024
+
 		
