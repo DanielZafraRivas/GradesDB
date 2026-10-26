@@ -133,6 +133,37 @@ BEGIN
 END //
 DELIMITER ;
 
+-- Test de la rn14: El DNI está formado por 8 números y una letra
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn14_dni_format()
+BEGIN
+	DECLARE exit handler FOR SQLEXCEPTION 
+		CALL p_log_test('RN14', 'RN14: El DNI debe estar formado por 8 números y una letra', 'PASS');
+	
+	CALL p_populate();
+	
+	INSERT INTO people (person_id, dni, first_name, last_name, age, email)
+        			VALUES (106, 'INVALIDO', 'DNI', 'Incorrecto', 30, 'dni@us.es');
+
+	CALL p_log_test('RN14', 'ERROR: Se permitió un DNI con formato inválido', 'FAIL');
+END // 
+DELIMITER ;
+
+-- Test de la rn15: El año académico está comprendido entre 2000 y 2100
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn15_academic_year()
+BEGIN 
+	DECLARE exit handler FOR SQLEXCEPTION 
+		CALL p_log_test('RN15', 'RN15: El año académico debe estar comprendido entre 2000 y 2100', 'PASS');
+	
+	CALL p_populate();
+	
+	INSERT INTO groups (group_id, subject_id, group_name, activity, academic_year)
+        			VALUES (20, 12, 'MD-T2025', 'Teoría', 1999);
+   
+   CALL p_log_test('RN15', 'ERROR: Se permitió un año académico fuera de rango', 'FAIL');
+END // 
+DELIMITER ;
 
 -- ================================================================================================================================
 -- ORQUESTADOR DE RESTRICCIONES DECLARATIVAS
@@ -149,6 +180,8 @@ BEGIN
 	CALL p_test_rn11_grade_range();
 	CALL p_test_rn12_people_age();
 	CALL p_test_rn13_degree_years();
+	CALL p_test_rn14_dni_format();
+	CALL p_test_rn15_academic_year();
 	
 	SELECT * FROM test_results ORDER BY execution_time, test_id;
 	SELECT test_status, COUNT(*) AS total FROM test_results GROUP BY test_status;
