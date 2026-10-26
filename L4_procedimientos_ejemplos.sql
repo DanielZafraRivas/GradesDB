@@ -1,4 +1,4 @@
-USE Grados;
+USE grados;
 
 -- EJEMPLO 1: Procedimiento para borrar notas de un alumno (RF02) =============================================================================================================
 
