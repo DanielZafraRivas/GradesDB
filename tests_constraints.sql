@@ -55,6 +55,23 @@ BEGIN
 END // 
 DELIMITER ;
 
+-- Test de la RN09: Los atributos obligatorios no se pueden quedar en NULL
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn09_not_null_atributes()
+BEGIN 
+	DECLARE exit handler FOR SQLEXCEPTION
+		CALL p_log_test('RN09', 'RN09: Los atributos obligatorios no pueden  ser null', 'PASS');
+	
+	CALL p_populate();
+	
+	INSERT INTO people(person_id, dni, first_name, last_name, age, email) VALUES (103, '20000003C', NULL, 'Campos', 22, 'NULL@alum.us.es');
+	
+	CALL p_log_test('RN09', 'ERROR: Se permitió dejar atributos obligatorios en NULL', 'FAIL');
+END //
+DELIMITER ;
+
+
+
 
 -- ================================================================================================================================
 -- ORQUESTADOR DE RESTRICCIONES DECLARATIVAS
@@ -66,6 +83,7 @@ BEGIN
 	DELETE FROM test_results;
 	
 	CALL p_test_rn01_mh_requirement();
+	CALL p_test_rn09_not_null_atributes();
 	
 	SELECT * FROM test_results ORDER BY execution_time, test_id;
 	SELECT test_status, COUNT(*) AS total FROM test_results GROUP BY test_status;
