@@ -92,7 +92,7 @@ DELIMITER //
 CREATE OR REPLACE PROCEDURE p_test_rn11_grade_range()
 BEGIN
 	DECLARE exit handler FOR SQLEXCEPTION 
-		CALL p_log_test('RN11', 'RN11: El valor de la nota está comprendido entre 0 y 10', 'PASS');
+		CALL p_log_test('RN11', 'RN11: El valor de la nota debe estar comprendido entre 0 y 10', 'PASS');
 	
 	CALL p_populate();
 	
@@ -103,6 +103,35 @@ BEGIN
 END //
 DELIMITER ;
 	
+-- Test de la RN12: La edad de las personas está entre 16 y 70 años
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn12_people_age()
+BEGIN 
+	DECLARE exit handler FOR SQLEXCEPTION 
+		CALL p_log_test('RN12', 'RN12: La edad de las personas debe estar entre 16 y 70', 'PASS');
+	
+	CALL p_populate();
+	INSERT INTO people (person_id, dni, first_name, last_name, age, email)
+       			 VALUES (105, '20000005E', 'Edad', 'Fuera', 80, 'edad@us.es');
+       			 
+   CALL p_log_test('RN12', 'ERROR: Se permitió una edad fuera de rango', 'FAIL');
+END // 
+DELIMITER ;
+
+-- Test de la rn13: Los años de un grado están entre 3 y 6
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn13_degree_years()
+BEGIN 
+	DECLARE exit handler FOR SQLEXCEPTION 
+		CALL p_log_test('RN13', 'RN13: Los años de un grado deben estar entre 3 y 6', 'PASS');
+	
+	CALL p_populate();
+	INSERT INTO degrees (degree_id, degree_name, duration_years)
+        			VALUES (10, 'Grado Experimental (para el test)', 2);
+   
+   CALL p_log_test('RN13', 'ERROR: Se permitió un grado con años fuera de rango', 'FAIL');
+END //
+DELIMITER ;
 
 
 -- ================================================================================================================================
@@ -118,6 +147,8 @@ BEGIN
 	CALL p_test_rn09_not_null_atributes();
 	CALL p_test_rn10_subject_credits();
 	CALL p_test_rn11_grade_range();
+	CALL p_test_rn12_people_age();
+	CALL p_test_rn13_degree_years();
 	
 	SELECT * FROM test_results ORDER BY execution_time, test_id;
 	SELECT test_status, COUNT(*) AS total FROM test_results GROUP BY test_status;
