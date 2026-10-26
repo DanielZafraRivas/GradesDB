@@ -71,11 +71,11 @@ BEGIN
 END //
 DELIMITER ;
 
--- Test de la rn10: Los créditos de una asignatura pueden ser 6 o 12
+-- Test de la RN10: Los créditos de una asignatura pueden ser 6 o 12
 DELIMITER //
 CREATE OR REPLACE PROCEDURE p_test_rn10_subject_credits()
 BEGIN 
-	DECLARE exit handler FOR sqlexception
+	DECLARE exit handler FOR SQLEXCEPTION 
 		CALL p_log_test('RN10', 'RN10: Los créditos de una asignatura pueden ser 6 o 12', 'PASS');
 	
 	CALL p_populate();
@@ -84,6 +84,22 @@ BEGIN
 					VALUES (31, 3, 'Asignatura Créditos Inválidos', 'ACI', 8, 2, 'Obligatoria');
 	
 	CALL p_log_test('RN10', 'ERROR: Se permitió una asignatura con créditos inválidos', 'FAIL');
+END //
+DELIMITER ;
+
+-- Test de la RN11: El valor de la nota está comprendido entre 0 y 10
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn11_grade_range()
+BEGIN
+	DECLARE exit handler FOR SQLEXCEPTION 
+		CALL p_log_test('RN11', 'RN11: El valor de la nota está comprendido entre 0 y 10', 'PASS');
+	
+	CALL p_populate();
+	
+	INSERT INTO grades (grade_id, student_id, group_id, grade_value, exam_call, with_honors)
+					VALUES (201, 6, 1, 11.0, 'Primera', 0);
+	
+	CALL p_log_test('RN11', 'ERROR: Se permitió una nota con valor fuera de rango', 'FAIL');
 END //
 DELIMITER ;
 	
@@ -101,6 +117,7 @@ BEGIN
 	CALL p_test_rn01_mh_requirement();
 	CALL p_test_rn09_not_null_atributes();
 	CALL p_test_rn10_subject_credits();
+	CALL p_test_rn11_grade_range();
 	
 	SELECT * FROM test_results ORDER BY execution_time, test_id;
 	SELECT test_status, COUNT(*) AS total FROM test_results GROUP BY test_status;
