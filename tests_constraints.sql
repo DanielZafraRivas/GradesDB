@@ -165,6 +165,22 @@ BEGIN
 END // 
 DELIMITER ;
 
+-- Test de la RN16: El curso de una asignatura está entre 1 y 6
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn16_course_range()
+BEGIN 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+		CALL p_log_test('RN16', 'RN16: El curso de una asignatura debe estar entre 1 y 6', 'PASS');
+	
+	CALL p_populate();
+	
+	INSERT INTO subjects (subject_id, degree_id, subject_name, acronym, credits, course, subject_type)
+       			 VALUES (30, 3, 'Asignatura Fuera de Curso', 'AFC', 6, 0, 'Obligatoria');
+   
+   CALL p_log_test('RN16', 'ERROR: Se permitió un curso fuera de rango', 'FAIL');
+END // 
+DELIMITER ;
+
 -- ================================================================================================================================
 -- ORQUESTADOR DE RESTRICCIONES DECLARATIVAS
 -- Vacía los resultados anteriores, ejecuta todos los tests y muestra el resultado de cada uno y el total de PASS y FAIL
@@ -182,6 +198,7 @@ BEGIN
 	CALL p_test_rn13_degree_years();
 	CALL p_test_rn14_dni_format();
 	CALL p_test_rn15_academic_year();
+	CALL p_test_rn16_course_range();
 	
 	SELECT * FROM test_results ORDER BY execution_time, test_id;
 	SELECT test_status, COUNT(*) AS total FROM test_results GROUP BY test_status;
