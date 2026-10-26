@@ -64,13 +64,29 @@ BEGIN
 	
 	CALL p_populate();
 	
-	INSERT INTO people(person_id, dni, first_name, last_name, age, email) VALUES (103, '20000003C', NULL, 'Campos', 22, 'NULL@alum.us.es');
+	INSERT INTO people(person_id, dni, first_name, last_name, age, email) 
+					VALUES (103, '20000003C', NULL, 'Campos', 22, 'NULL@alum.us.es');
 	
 	CALL p_log_test('RN09', 'ERROR: Se permitió dejar atributos obligatorios en NULL', 'FAIL');
 END //
 DELIMITER ;
 
-
+-- Test de la rn10: Los créditos de una asignatura pueden ser 6 o 12
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_test_rn10_subject_credits()
+BEGIN 
+	DECLARE exit handler FOR sqlexception
+		CALL p_log_test('RN10', 'RN10: Los créditos de una asignatura pueden ser 6 o 12', 'PASS');
+	
+	CALL p_populate();
+	
+	INSERT INTO subjects(subject_id, degree_id, subject_name, acronym, credits, course, subject_type) 
+					VALUES (31, 3, 'Asignatura Créditos Inválidos', 'ACI', 8, 2, 'Obligatoria');
+	
+	CALL p_log_test('RN10', 'ERROR: Se permitió una asignatura con créditos inválidos', 'FAIL');
+END //
+DELIMITER ;
+	
 
 
 -- ================================================================================================================================
@@ -84,6 +100,7 @@ BEGIN
 	
 	CALL p_test_rn01_mh_requirement();
 	CALL p_test_rn09_not_null_atributes();
+	CALL p_test_rn10_subject_credits();
 	
 	SELECT * FROM test_results ORDER BY execution_time, test_id;
 	SELECT test_status, COUNT(*) AS total FROM test_results GROUP BY test_status;
