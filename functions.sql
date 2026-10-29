@@ -36,7 +36,7 @@ SELECT p.first_name, p.last_name
 
 
 -- ===============================================================================================================================================
--- Ejemplo 2: Función para verificar si un estudiante está matriculado en una asignatura
+-- Ejemplo 2: Función para verificar si un estudiante está matriculado en una asignatura (funcion 1 auxiliar para triggers)
 -- ===============================================================================================================================================
 -- RN07: indica si el alumno está matriculado en la asignatura.  La usaremos en el trigger t_biu_students_groups_rn04_rn07
 DELIMITER //
@@ -68,7 +68,7 @@ WHERE f_is_student_enrolled(6, s.subject_id) = TRUE;
 
 
 -- ===============================================================================================================================================
--- Ejemplo 3: Función para verificar el límite de grupos por asignatura
+-- Ejemplo 3: Función para verificar el límite de grupos por asignatura (funcion 2 auxiliar para triggers)
 -- ===============================================================================================================================================
 -- RN06: indica si la asignatura ya tiene en ese año académico el máximo de grupos de la actividad (uno de teoría o dos de laboratorio).
 -- La usaremos en el trigger t_biu_groups_rn06
@@ -105,9 +105,34 @@ SELECT f_subject_group_limit_reached(1, 'Teoría', 2025) AS 'Límite alcanzado';
 -- Ahora pruebo con la asignatura 11 en 2024 (vemos que esta si ha alcanzado el límite)
 SELECT f_subject_group_limit_reached(11, 'Teoría', 2024) AS 'Límite alcanzado';
 
--- Lista de asignaturas que han alcanzado el límite de grupos de teoría
+-- Lista de asignaturas que han alcanzado el límite de grupos de teoría en 2025 (ninguna)
 SELECT s.subject_id, s.subject_name, s.acronym
 FROM subjects s
-WHERE f_subject_group_limit_reached(s.subject_id, 'Teoría', 2024) = TRUE;
+WHERE f_subject_group_limit_reached(s.subject_id, 'Teoría', 2025) = TRUE;
 	
 	
+-- ===============================================================================================================================================
+-- Función 4: Para ver el límite de grupos por estudiante (funcion 3 auxiliar para triggers)
+-- ===============================================================================================================================================
+-- RN04: indica si el alumno ya está en un grupo de la actividad (teoría o laboratorio) en la asignatura. 
+-- La usaremos en el trigger t_biu_students_groups_rn04_rn07
+DELIMITER //
+CREATE OR REPLACE FUNCTION f_student_group_limit(
+	p_student_id INT,
+	p_subject_id INT,
+	p_activity VARCHAR(15)
+) RETURNS BOOLEAN
+DETERMINISTIC
+READS SQL DATA
+BEGIN 
+	DECLARE v_count INT;
+	-- Seleccionar grupos de esa asignatura y actividad en los que ya está el alumno
+	SELECT COUNT(*) INTO v_count
+	FROM group_enrollments ge
+	JOIN groups g ON g.group_id = ge.group_id
+	WHERE ge.student_id = p_student_id AND g.subject_id = p_subject_id AND g.activity = p_activity;
+	
+	-- verificamos la RN04: como máximo un grupo de cada actividad (teoría o laboratorio)
+	RETURN v_count >= 1;
+END //
+DELIMITER ;
