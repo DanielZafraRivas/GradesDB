@@ -65,3 +65,49 @@ WHERE s.degree_id = 3;
 SELECT s.subject_name
 FROM subjects s
 WHERE f_is_student_enrolled(6, s.subject_id) = TRUE;
+
+
+-- ===============================================================================================================================================
+-- Ejemplo 3: Función para verificar el límite de grupos por asignatura
+-- ===============================================================================================================================================
+-- RN06: indica si la asignatura ya tiene en ese año académico el máximo de grupos de la actividad (uno de teoría o dos de laboratorio).
+-- La usaremos en el trigger t_biu_groups_rn06
+DELIMITER //
+CREATE OR REPLACE FUNCTION f_subject_group_limit_reached(
+	p_subject_id INT,
+	p_activity VARCHAR(15),
+	p_academic_year YEAR
+) RETURNS BOOLEAN
+DETERMINISTIC
+READS SQL DATA
+BEGIN 
+	DECLARE v_count INT;
+	DECLARE v_result BOOLEAN DEFAULT FALSE;
+	
+	-- Para ver los grupos que ya tiene la asignatura de esa actividad en ese año
+	SELECT COUNT(*) INTO v_count
+	FROM groups
+	WHERE subject_id = p_subject_id AND activity = p_activity AND academic_year = p_academic_year;
+	
+	-- El máximo depende de la actiividad
+	IF p_activity = 'Teoría' THEN 
+		SET v_result = (v_count >= 1);
+	ELSEIF p_activity = 'Laboratorio' THEN
+		SET v_result = (v_count >= 2);
+	END IF;
+	
+	RETURN v_result;
+END //
+DELIMITER ;
+	
+-- La ejecutamos: Verifico si la asignatura 1 ya tiene el máximo de grupos de teoría en 2025  (no)
+SELECT f_subject_group_limit_reached(1, 'Teoría', 2025) AS 'Límite alcanzado';
+-- Ahora pruebo con la asignatura 11 en 2024 (vemos que esta si ha alcanzado el límite)
+SELECT f_subject_group_limit_reached(11, 'Teoría', 2024) AS 'Límite alcanzado';
+
+-- Lista de asignaturas que han alcanzado el límite de grupos de teoría
+SELECT s.subject_id, s.subject_name, s.acronym
+FROM subjects s
+WHERE f_subject_group_limit_reached(s.subject_id, 'Teoría', 2024) = TRUE;
+	
+	
