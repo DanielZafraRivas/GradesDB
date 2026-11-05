@@ -78,7 +78,7 @@ END //
 -- =============================================================================================================================
 DELIMITER //
 CREATE OR REPLACE TRIGGER t_bu_grades_rn05
-BEFORE UPDATE ON grades
+BEFORE UPDATE ON grades   -- Notemos que es solo BEFORE UPDATE (no aplica a INSERT)
 FOR EACH ROW 
 BEGIN 
 	-- ABS (valor absoluto) para contar igual una subida que una bajada de nota
@@ -89,5 +89,24 @@ BEGIN
 END // 
 
 
-
-
+-- =============================================================================================================================
+-- 5) Trigger RN03: Un grupo no puede tener más de 2 profesores asignados
+-- =============================================================================================================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_teaching_loads_rn03
+BEFORE INSERT OR UPDATE ON teaching_loads
+FOR EACH ROW
+BEGIN
+	DECLARE v_count INT;
+	
+	IF NOT (NEW.group_id <=> OLD.group_id) THEN
+		SELECT COUNT(*) INTO v_count
+		FROM teaching_loads
+		WHERE group_id = NEW.group_id;
+		
+		IF v_count >= 2 THEN
+			SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'RN03: El grupo ya tiene 2 profesores asignados';
+		END IF;
+	END IF;
+END // 
