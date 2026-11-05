@@ -1,5 +1,5 @@
 -- mariadb < load_db.sql
-SOURCE createdb.sql;
+SOURCE createdb.SQL;
 SOURCE populatedb.sql;
 SOURCE populatedb2.sql;
 -- SOURCE L4_procedimientos_ejemplos.sql;
