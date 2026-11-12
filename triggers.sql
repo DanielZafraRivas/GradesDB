@@ -114,7 +114,7 @@ END //
 
 -- =============================================================================================================================
 -- 6) Trigger RN04: Un alumno solo debe estar en 1 grupo de teoria y 1 de laboratorio por asignatura
--- 7) Trigger RN07: Un alumno debe estar matriculado en la asignatura antes de unirse a un grupo
+--    Trigger RN07: Un alumno debe estar matriculado en la asignatura antes de unirse a un grupo
 -- =============================================================================================================================
 DELIMITER //
 CREATE OR REPLACE TRIGGER t_biu_students_groups_rn04_rn07
@@ -152,5 +152,28 @@ BEGIN
 				SIGNAL SQLSTATE '45000'
 					SET MESSAGE_TEXT = 'RN04: Solo puede haber un grupo de laboratorio por asignatura y alumno';
 			END if;
+	END if;
+END //
+
+-- =============================================================================================================================
+-- 7) Trigger RN06: Solo puede haber 1 grupo de teoría y 2 de laboratorio por asignatura y año académico
+-- =============================================================================================================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_groups_rn06
+BEFORE INSERT OR UPDATE ON groups
+FOR EACH ROW 
+BEGIN 
+	-- Comprobamos si el grupo entra en otra asignatura, actividad o año:
+	-- (de nuevo, en INSERT, OLD vale NULL: se comprueba siempre en UPDATE solo si cambia alguno de los tres (<=> trata NULL como un valor)
+	if NOT (NEW.subject_id <=> OLD.subject_id AND NEW.activity <=> OLD.activity AND NEW.academic_year <=> OLD.academic_year) then
+		if f_subject_group_limit_reached(NEW.subject_id, NEW.activity, NEW.academic_year) then 
+			if NEW.activity = 'Teoría' then
+				SIGNAL SQLSTATE '45000' 
+					SET MESSAGE_TEXT = 'RN06: Solo puede existir un grupo de teoría por asignatura y año académico';
+			ELSE 
+				SIGNAL SQLSTATE '45000'
+					SET MESSAGE_TEXT = 'RN06: Solo pueden existir dos grupos de laboratorio por asignatura y año académico';
+			END if;
+		END if;
 	END if;
 END //
