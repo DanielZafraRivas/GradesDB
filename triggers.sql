@@ -110,3 +110,47 @@ BEGIN
 		END IF;
 	END IF;
 END // 
+
+
+-- =============================================================================================================================
+-- 6) Trigger RN04: Un alumno solo debe estar en 1 grupo de teoria y 1 de laboratorio por asignatura
+-- 7) Trigger RN07: Un alumno debe estar matriculado en la asignatura antes de unirse a un grupo
+-- =============================================================================================================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_students_groups_rn04_rn07
+BEFORE INSERT OR UPDATE ON group_enrollments
+FOR EACH ROW
+BEGIN 
+	DECLARE v_subject_id INT;
+	DECLARE v_activity VARCHAR(15);
+	DECLARE v_old_subject_id INT;
+	DECLARE v_old_activity VARCHAR(15);
+	
+	-- Asignatura y actividad del grupo nuevo (NEW)
+	SELECT subject_id, activity INTO v_subject_id, v_activity
+	FROM groups 
+	WHERE group_id = NEW.group_id;
+	
+	-- Asignatura y actividad del grupo anterior (OLD)
+	-- CUIDADO: en INSERT, OLD.group_id vale NULL y quedan a NULL, por eso se hace con SET
+	SET v_old_subject_id = (SELECT subject_id FROM groups WHERE group_id = OLD.group_id);
+	SET v_old_activity = (SELECT activity FROM groups WHERE group_id = OLD.group_id);
+	
+	if NOT f_is_student_enrolled(NEW.student_id, v_subject_id) then 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'RN07: El alumno debe estar matriculado en la asignatura';
+	END if;
+	
+	-- RN04 solo se comprueba si el alumno entra en un grupo de otra asignatura o actividad (cambiar de L1 a L2 de la misma asignatura está permitido)
+	-- CUIDADO: En INSERT, OLD y las variables v_old_* valen NULL: se comprueba siempre
+	if NOT (NEW.student_id <=> OLD.student_id AND v_subject_id <=> v_old_subject_id AND v_activity <=> v_old_activity)
+		AND f_student_group_limit(NEW.student_id, v_subject_id, v_activity) then 
+			if v_activity = 'Teoría' then
+				SIGNAL SQLSTATE '45000'
+					SET MESSAGE_TEXT = 'RN04: Solo puede haber un grupo de teoría por asignatura y alumno';
+			ELSE 
+				SIGNAL SQLSTATE '45000'
+					SET MESSAGE_TEXT = 'RN04: Solo puede haber un grupo de laboratorio por asignatura y alumno';
+			END if;
+	END if;
+END //
