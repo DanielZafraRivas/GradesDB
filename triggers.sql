@@ -177,3 +177,45 @@ BEGIN
 		END if;
 	END if;
 END //
+DELIMITER ;
+
+
+-- =============================================================================================================================
+-- 8) Trigger Propuesto: Que un grado no pueda tener más de 240 créditos en total sumando todas las asignaturas
+-- =============================================================================================================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_ej1_creditos_totales_grado
+BEFORE INSERT OR UPDATE ON subjects
+FOR EACH ROW
+BEGIN 
+	DECLARE v_creditos_totales INT;
+	
+	IF NOT (NEW.subject_id <=> OLD.subject_id) THEN
+		SELECT COALESCE(SUM(credits), 0) + NEW.credits INTO v_creditos_totales
+    FROM subjects 
+    WHERE degree_id = NEW.degree_id;
+		
+		IF v_creditos_totales > 240 THEN
+			SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'El grado ya tiene una suma de 240 creditos asignados de sus asignaturas';
+		END IF;
+	END IF;
+END //
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
