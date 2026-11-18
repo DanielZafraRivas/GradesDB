@@ -191,7 +191,7 @@ BEGIN
 	DECLARE v_creditos_totales INT;
 	
 	IF NOT (NEW.subject_id <=> OLD.subject_id) THEN
-		SELECT COALESCE(SUM(credits), 0) + NEW.credits INTO v_creditos_totales
+	SELECT COALESCE(SUM(credits), 0) + NEW.credits INTO v_creditos_totales
     FROM subjects 
     WHERE degree_id = NEW.degree_id;
 		
@@ -204,12 +204,30 @@ END //
 DELIMITER ;
 
 
-
-
-
-
-
-
+-- =============================================================================================================================
+-- 9) Trigger Propuesto: Validar que un estudiante no pueda estar matriculado en más de 60 créditos por año académico.
+-- =============================================================================================================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER t_biu_ej2_creditos_totales_estudiante_año
+BEFORE INSERT OR UPDATE ON subject_enrollments
+FOR EACH ROW
+BEGIN 
+	DECLARE v_creditos_totales_año INT;
+	
+	IF NOT (NEW.student_id <=> OLD.student_id) THEN
+	SELECT COALESCE(SUM(credits), 0) INTO v_creditos_totales_año
+		FROM subject_enrollments se
+		JOIN subjects su ON su.subject_id = se.subject_id
+		JOIN groups g ON g.subject_id = su.subject_id
+		WHERE student_id = NEW.student_id --  AND g.academic_year = NEW.academic_year;   error, no se puede poner así
+		
+		IF v_creditos_totales_año > 60 THEN 
+			SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'El estudiante ya esta matriculado en 60 créditos en un año académico';
+		END IF;
+	END IF;
+END //
+DELIMITER ;
 
 
 
