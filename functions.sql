@@ -159,8 +159,29 @@ DELIMITER ;
 
 -- Compruebo que funcione: 
 SELECT f_count_student_grades(21, 'Tercera');
+
+
+-- ===============================================================================================================================================
+-- Función 6 (LAB 5 ejercicio propuesto) : Calcular el total de créditos que imparte un profesor
+-- ===============================================================================================================================================	
+DELIMITER // 
+CREATE OR REPLACE FUNCTION f_professor_total_credits(
+	p_professor_id INT
+) RETURNS DECIMAL(4,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN 
+	DECLARE v_creditos_totales DECIMAL(4,2);
+	SELECT COALESCE(SUM(teaching_credits), 0) INTO v_creditos_totales
+	FROM v_professor_loads p
+	WHERE p.person_id = p_professor_id;
 	
-	
+	RETURN v_creditos_totales;
+END //  
+DELIMITER ;
+
+-- Compruebo que funcione
+SELECT f_professor_total_credits(1) AS creditos_totales;
 	
 	
 	
