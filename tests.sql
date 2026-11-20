@@ -4,7 +4,7 @@
 -- Descripción: Tests negativos para la BD de Grados
 -- Se incluye en: iissi1/labs/L5 y AN-B
 --
-USE grados;
+USE grados_db;
 
 -- =============================================================
 -- TABLA DE RESULTADOS

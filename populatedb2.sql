@@ -4,7 +4,7 @@
 -- Descripción: Datos adicionales para GradesDB para cubrir consultas de L3
 --              Este script añade datos sin borrar los existentes de populateDB.sql
 --
-USE Grados;
+USE grados_db;
 
 DELIMITER //
 CREATE OR REPLACE PROCEDURE p_populate_grados_extra()

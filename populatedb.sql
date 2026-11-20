@@ -1,4 +1,4 @@
- USE grados;
+ USE grados_db;
 
 DELIMITER // 
 CREATE OR REPLACE PROCEDURE p_populate()

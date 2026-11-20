@@ -1,4 +1,4 @@
-USE grados;
+USE grados_db;
 
 -- EJEMPLO 1: Procedimiento para borrar notas de un alumno (RF02) =============================================================================================================
 

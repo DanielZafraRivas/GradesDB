@@ -1,4 +1,4 @@
-USE grados;
+USE grados_db;
 
 
 -- Con AUTOCOMMIT activado (por defecto), START TRANSACTION agrupa las sentencias

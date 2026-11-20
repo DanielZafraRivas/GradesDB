@@ -1,4 +1,4 @@
-USE grados;
+USE grados_db;
 
 -- ===========================================================================================================================
 -- 1) Trigger RN08: Edad mínima para selectividad (debe tener al menos 16 años)
@@ -205,7 +205,7 @@ DELIMITER ;
 
 
 -- =============================================================================================================================
--- 9) Trigger Propuesto: Validar que un estudiante no pueda estar matriculado en más de 60 créditos por año académico.
+-- 9) Trigger Propuesto: Validar que un estudiante no pueda estar matriculado en más de 60 créditos por año académico.  (ESTA MAL)
 -- =============================================================================================================================
 DELIMITER //
 CREATE OR REPLACE TRIGGER t_biu_ej2_creditos_totales_estudiante_año

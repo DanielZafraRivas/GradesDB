@@ -5,7 +5,7 @@
 --              Cubre conceptos de consultas simples y avanzadas
 -- 
 
-USE Grados;
+USE grados_db;
 
 -- Consulta 1: Todas las asignaturas ================================================================================================0
 -- Recupera todos los campos de todas las asignaturas en la base de datos.

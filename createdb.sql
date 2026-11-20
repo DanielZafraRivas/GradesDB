@@ -1,4 +1,4 @@
-USE grados; -- para que se creen en la base de datos "grados" siempre (por si me he confundido y tengo en cursor en otra base)
+USE grados_db; -- para que se creen en la base de datos "grados" siempre (por si me he confundido y tengo en cursor en otra base)
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS people;
