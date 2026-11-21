@@ -6,13 +6,41 @@ USE grados_db;
 -- =====================================================================================================
 SELECT @@transaction_isolation;
 
-SET SESSION TRANSACTION 
-ISOLATION LEVEL REPEATABLE READ;
+SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 START TRANSACTION;
+-- Ejecucion 2
 
 SELECT grade_value FROM grades WHERE grade_id = 3; -- 5.4
+-- Ejecucion 3
 
 SELECT grade_value FROM grades WHERE grade_id = 3; -- 5.4
+-- Ejecucion 5
 
 COMMIT;
 SELECT grade_value FROM grades WHERE grade_id = 3; -- 6.4
+-- Ejecución 6
+
+-- Podemos ver que dentro de la transacción, B lee los datos como estaban en su primera lectura, no ve la subida, aunque en A la hayamos confirmado. Al cerrar su transacción (COMMIT) si la ve.
+
+
+-- =====================================================================================================
+-- Con READ COMMITED 
+-- =====================================================================================================
+
+-- Cambiamos el aislamiento en esta sesión
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+
+SELECT @@transaction_isolation;
+-- Ejecución 2
+
+SELECT grade_value FROM grades WHERE grade_id = 3; -- 5.4
+-- Ejecucion 3
+
+SELECT grade_value FROM grades WHERE grade_id = 3; -- 6.4
+-- Ejecucion 5
+
+COMMIT;
+SELECT grade_value FROM grades WHERE grade_id = 3; -- 6.4
+-- Ejecucion 6
+
