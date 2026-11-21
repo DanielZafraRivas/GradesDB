@@ -322,3 +322,41 @@ SELECT * FROM degrees WHERE degree_name = 'Grado en Ciberseguridad';
 SELECT * FROM subjects WHERE subject_name = 'Redes Neuronales';
 
 
+-- =================================================================================================================================================================
+-- LABORATORIO 7: EJERCICIOS PROPUESTOS
+-- =================================================================================================================================================================
+-- Procedimiento transaccional que mueva a un estudiante de un grupo a otro, garantizando atomicidad
+DELIMITER // 
+CREATE OR REPLACE PROCEDURE p_transfer_student(
+	p_student_id INT,
+	p_new_group_id INT
+)
+BEGIN 
+	DECLARE exit handler FOR SQLEXCEPTION 
+	BEGIN 
+		ROLLBACK;
+		RESIGNAL;
+	END;
+	
+	START TRANSACTION;
+	
+	DELETE FROM group_enrollments WHERE student_id = p_student_id;
+	
+	INSERT INTO group_enrollments(student_id, group_id) VALUES (p_student_id, p_new_group_id);
+	
+	
+	COMMIT;
+END // 
+DELIMITER ;
+
+-- Vamos a comprobarlo:
+CALL p_populate();
+INSERT INTO people (person_id, dni, first_name, last_name, age, email) VALUES
+    						(67, '00000111A', 'Prueba', 'transfer_student', 67, 'prueba@us.es');
+INSERT INTO students (student_id, access_method) VALUES (67, 'Selectividad');
+INSERT INTO group_enrollments (student_id, group_id) VALUES (67, 3);
+SELECT * FROM group_enrollments WHERE student_id = 67;
+
+CALL p_transfer_student(67, 1);
+
+SELECT * FROM group_enrollments WHERE student_id = 67;
