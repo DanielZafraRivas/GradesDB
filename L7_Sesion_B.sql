@@ -20,6 +20,7 @@ COMMIT;
 SELECT grade_value FROM grades WHERE grade_id = 3; -- 6.4
 -- Ejecución 6
 
+-- EXPLICACIÓN 
 -- Podemos ver que dentro de la transacción, B lee los datos como estaban en su primera lectura, no ve la subida, aunque en A la hayamos confirmado. Al cerrar su transacción (COMMIT) si la ve.
 
 
@@ -44,3 +45,5 @@ COMMIT;
 SELECT grade_value FROM grades WHERE grade_id = 3; -- 6.4
 -- Ejecucion 6
 
+-- EXPLICACIÓN 
+-- Vemos que dentro de la misma transacción, la consulta de B ve dos valores distintos (5.4 y la actualizacion a 6.4) lo cual se evita con REPEATABLE READ 
