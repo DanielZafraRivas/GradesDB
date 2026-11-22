@@ -325,10 +325,11 @@ SELECT * FROM subjects WHERE subject_name = 'Redes Neuronales';
 -- =================================================================================================================================================================
 -- LABORATORIO 7: EJERCICIOS PROPUESTOS
 -- =================================================================================================================================================================
--- Procedimiento transaccional que mueva a un estudiante de un grupo a otro, garantizando atomicidad
+-- EJERCICIO 1: Procedimiento transaccional que mueva a un estudiante de un grupo a otro, garantizando atomicidad
 DELIMITER // 
 CREATE OR REPLACE PROCEDURE p_transfer_student(
 	p_student_id INT,
+	p_old_group_id INT,
 	p_new_group_id INT
 )
 BEGIN 
@@ -340,7 +341,7 @@ BEGIN
 	
 	START TRANSACTION;
 	
-	DELETE FROM group_enrollments WHERE student_id = p_student_id;
+	DELETE FROM group_enrollments WHERE student_id = p_student_id AND group_id = p_old_group_id;
 	
 	INSERT INTO group_enrollments(student_id, group_id) VALUES (p_student_id, p_new_group_id);
 	
@@ -351,12 +352,41 @@ DELIMITER ;
 
 -- Vamos a comprobarlo:
 CALL p_populate();
-INSERT INTO people (person_id, dni, first_name, last_name, age, email) VALUES
-    						(67, '00000111A', 'Prueba', 'transfer_student', 67, 'prueba@us.es');
-INSERT INTO students (student_id, access_method) VALUES (67, 'Selectividad');
-INSERT INTO group_enrollments (student_id, group_id) VALUES (67, 3);
-SELECT * FROM group_enrollments WHERE student_id = 67;
+SELECT * FROM group_enrollments WHERE student_id = 7;
 
-CALL p_transfer_student(67, 1);
+CALL p_transfer_student(7, 1, 3);
 
-SELECT * FROM group_enrollments WHERE student_id = 67;
+SELECT * FROM group_enrollments WHERE student_id = 7;
+
+
+-- EJERCICIO 2:  Procedimiento que actualice una nota y guarde el valor antiguo en una tabla de historial grade_history. Debe ser atómico.
+DELIMITER //
+CREATE OR REPLACE PROCEDURE p_update_grade_with_history(
+	p_grade_id INT,
+	p_new_grade_value DECIMAL(4, 2)
+)
+BEGIN 
+	DECLARE v_grade_history DECIMAL(4,2);
+
+	DECLARE exit handler FOR SQLEXCEPTION
+	BEGIN 
+		ROLLBACK;
+		RESIGNAL;
+	END;
+	
+	START TRANSACTION; 
+	
+	SELECT grade_value INTO v_grade_history FROM grades WHERE grade_id = p_grade_id;
+	UPDATE grades SET grade_value = p_new_grade_value WHERE grade_id = p_grade_id;
+	SELECT v_grade_history AS antigua_nota;
+	
+	COMMIT;
+END //
+DELIMITER ;
+
+-- Comprobemoslo
+CALL p_populate();
+SELECT * FROM grades WHERE grade_id = 5;
+
+CALL p_update_grade_with_history(5, 8.2);
+SELECT * FROM grades WHERE grade_id = 5;
