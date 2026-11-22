@@ -24,3 +24,19 @@ CALL p_populate();
 UPDATE grades 
 SET grade_value = grade_value + 1 WHERE grade_id = 3;
 -- Ejecucion 4
+
+
+-- =====================================================================================================
+-- EJERCICIO PROPUESTO 3:
+-- =====================================================================================================
+-- Con REPEATABLE READ: 
+
+CALL p_populate(); 
+-- Ejecucion 0
+
+START TRANSACTION;
+UPDATE grades SET grade_value = 9 WHERE grade_id = 1; -- (era 9.8)
+-- Ejecucion 2
+
+COMMIT;
+-- Ejecucion 4
