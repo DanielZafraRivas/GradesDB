@@ -15,7 +15,7 @@ SET grade_value = grade_value + 1 WHERE grade_id = 3;
 
 
 -- =====================================================================================================
--- Con READ COMMITED
+-- Con READ COMMITTED
 -- =====================================================================================================
 
 CALL p_populate();
@@ -40,3 +40,5 @@ UPDATE grades SET grade_value = 9 WHERE grade_id = 1; -- (era 9.8)
 
 COMMIT;
 -- Ejecucion 4
+
+-- Reutilizo el código de arriba para el READ COMMITTED

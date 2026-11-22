@@ -25,7 +25,7 @@ SELECT grade_value FROM grades WHERE grade_id = 3; -- 6.4
 
 
 -- =====================================================================================================
--- Con READ COMMITED 
+-- Con READ COMMITTED 
 -- =====================================================================================================
 
 -- Cambiamos el aislamiento en esta sesión
@@ -65,3 +65,20 @@ SELECT grade_value FROM grades WHERE grade_id = 1; -- 9.8 (aunque se haya confir
 
 COMMIT;
 SELECT grade_value FROM grades WHERE grade_id = 1; -- 9 (ya si lo hemos confirmado tanto en A como en B)
+-- Ejecucion 6
+-- ----------------------------------------------------------------------------------------
+-- Con READ COMMITTED: 
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+START TRANSACTION;
+-- Ejecucion 1
+
+SELECT grade_value FROM grades WHERE grade_id = 1; -- 9.8  (todavia ni siquiera se ha confirmado la transacción en A)
+-- Ejecucion 3
+
+SELECT grade_value FROM grades WHERE grade_id = 1; -- 9 (aquí está la diferencia respecto a REPEATABLE READ, no hace falta que hayamos terminado la transacción B, el valor cambia al cambiar en A)
+-- Ejecucion 5
+
+COMMIT;
+SELECT grade_value FROM grades WHERE grade_id = 1; -- 9 (ya se ha confirmado en ambas consultas)
+-- Ejecucion 6
